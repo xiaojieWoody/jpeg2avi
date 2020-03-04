@@ -1,5 +1,6 @@
 package com.tencent.jpegutil.util;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,12 +10,20 @@ import java.util.*;
 
 public class FfmpegUtil {
 
-    public static void test(String jpegPath) throws IOException {
-//        String source = "/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/jpegs.zip";
-//        String result = "/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/1.avi";
-        String parentPath = getParentPath(jpegPath) + File.separator + nowDateStr() + ".avi";
-        System.out.println("parentPath..." + parentPath);
-        transformJpeg2Video(jpegPath, parentPath);
+    /**
+     * 通过Ffmpeg，将图片转为视频
+     * @param commandLine
+     * @throws IOException
+     */
+    public static void transformByFfmpeg(CommandLine commandLine) throws IOException {
+        // jpeg图片目录路径
+        String jpegPath = commandLine.getOptionValue("p");
+        String comparess = commandLine.getOptionValue("c");
+        // 生成的视频文件存放在jpeg的同级目录下
+        String aviPath = getParentPath(jpegPath) + File.separator + nowDateStr() + ".avi" ;
+        System.out.println("video path:" + aviPath);
+        // jpeg图片转avi视频
+        transformJpeg2Video(jpegPath, aviPath,comparess);
     }
 
     /**
@@ -22,7 +31,7 @@ public class FfmpegUtil {
      * @param sourcePath    jpeg图片目录
      * @param targetPath    avi视频目录
      */
-    public static void transformJpeg2Video(String sourcePath, String targetPath) throws IOException {
+    public static void transformJpeg2Video(String sourcePath, String targetPath, String comparess) throws IOException {
 
         File sourceFile = new File(sourcePath);
         if(!sourceFile.exists() || !sourceFile.isDirectory()) {
@@ -31,18 +40,18 @@ public class FfmpegUtil {
 
         // jpeg目录的父目录路径
         String tmpParent = getParentPath(sourcePath);
-        System.out.println("tmpParent....." + tmpParent);
+//        System.out.println("tmpParent....." + tmpParent);
 
         String ffmpegPath = null;
         String jpegTmpDir = null;
         try {
             // jpeg目录同级目录下的临时目录
             jpegTmpDir = tmpParent + File.separator + "jpeg_tmp_" + nowDateStr();
-            System.out.println("jpeg_tmp_....." + jpegTmpDir);
+//            System.out.println("jpeg_tmp_....." + jpegTmpDir);
 
             // 获取ffmpeg路径
             ffmpegPath = getFfmpegPathBySystemOS();
-            System.out.println("ffmpegPath....." + ffmpegPath);
+//            System.out.println("ffmpegPath....." + ffmpegPath);
 
             // 所有jpeg文件
             File[] files = sourceFile.listFiles();
@@ -55,13 +64,33 @@ public class FfmpegUtil {
 
             // 图片转视频
             List<String> command = new ArrayList<>();
+            // ffmpeg可执行文件路径
             command.add(ffmpegPath);
+            // 处理的线程个数
+            command.add("-threads");
+            command.add("2");
+            // 指定为图片
             command.add("-f");
             command.add("image2");
+
+            // 视频帧率，默认25（一般视频默认值），-r 25，1秒播25个图片
+            // 视频时长(秒) = 图片数 / r
+//            command.add("-r");
+//            command.add("10");
+
+            // jpeg目录中图片（图片有序且名称要符合配置的正则表达式）
             command.add("-i");
             command.add(jpegTmpDir + File.separator + "%5d.jpeg");
-            command.add("-r");
-            command.add("25");
+
+            // 编码格式，控制分辨率(清晰度和体积)
+            // libx264 和图片一样清晰度
+            // 默认为mpeg4，清晰度一般，体积小
+            if(!"true".equals(comparess)) {
+                command.add("-vcodec");
+                command.add("libx264");
+            }
+
+            // 视频路径
             command.add(targetPath);
             // 执行命令
             process(command);
@@ -107,13 +136,13 @@ public class FfmpegUtil {
         String result  = null;
         // windows
         if(filePath.contains(":")) {
-            System.out.println("getParentPath filePath..." + filePath);
+//            System.out.println("getParentPath filePath..." + filePath);
             if(!filePath.contains("\\\\")) {
-                System.out.println("filePath..." + filePath);
+//                System.out.println("filePath..." + filePath);
                 return filePath;
             }
             result = filePath.substring(0, filePath.lastIndexOf("\\\\"));
-            System.out.println("result..." + result);
+//            System.out.println("result..." + result);
         } else {
             // linux mac
             String[] split = filePath.split(File.separator);
@@ -154,7 +183,7 @@ public class FfmpegUtil {
             ffmpegPath = getJarFile(resourcePath, "ffmpeg/linux/ffmpeg");
         }
 
-        System.out.println("ffmpegPath....." + ffmpegPath);
+//        System.out.println("ffmpegPath....." + ffmpegPath);
 
         File ffmpeg = new File(ffmpegPath);
         if(!ffmpeg.exists() || !ffmpeg.canExecute()) {
@@ -187,7 +216,7 @@ public class FfmpegUtil {
         String substring = targetFilePath.substring(targetFilePath.lastIndexOf(File.separator) + 1);
         // 目标文件
         File targetFile = new File(parentPath, substring);
-        System.out.println("getJarFile targetFile..." + targetFile.getAbsolutePath());
+//        System.out.println("getJarFile targetFile..." + targetFile.getAbsolutePath());
 
         // 获取jar包中文件流，ffmpeg/mac/ffmpeg
         InputStream resourceAsStream = FfmpegUtil.class.getClassLoader().getResourceAsStream(targetFilePath);
@@ -196,7 +225,7 @@ public class FfmpegUtil {
         }
         FileUtils.copyInputStreamToFile(resourceAsStream, targetFile);
         targetFile.setExecutable(true);
-        System.out.println("targetFile.getAbsolutePath()......" + targetFile.getAbsolutePath());
+//        System.out.println("targetFile.getAbsolutePath()......" + targetFile.getAbsolutePath());
         return targetFile.getAbsolutePath();
     }
 

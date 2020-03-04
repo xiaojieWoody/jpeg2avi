@@ -23,11 +23,17 @@ public class JpegToVideoApplication {
 
     public static void main(String[] args) throws Exception {
 //        FfmpegUtil.setExecAuth("/Users/dingyuanjie/work/engine/doc/jpeg-to-video/exec_test/ffmpeg3");
-//        JarFile jar = new JarFile("/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/result/jpeg-to-video-0.0.1-SNAPSHOT-jar-with-dependencies.jar");
-//        File f = new File("/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/result/ffmpeg");
-//
+        JarFile jar = new JarFile("/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/result/jpeg-to-video-0.0.1-SNAPSHOT-jar-with-dependencies.jar");
+        File f = new File("/Users/dingyuanjie/work/engine/doc/jpeg-to-video/ffmpeg/result/ffmpeg");
+
+//        JarEntry jarEntry1 = jar.getJarEntry("ffmpeg/mac/ffmpeg");
+//        InputStream inputStream = jar.getInputStream(jarEntry1);
+//        FileUtils.copyInputStreamToFile(inputStream, f);
+//        f.setExecutable(true);
+
 //        Enumeration<JarEntry> entries = jar.entries();
 //        while (entries.hasMoreElements()) {
+//            jar.getJarEntry("ffmpeg/mac/ffmpe");
 //            JarEntry jarEntry = entries.nextElement();
 //            String name = jarEntry.getName();
 //            if(name.equals("ffmpeg/mac/ffmpeg")) {
@@ -50,8 +56,8 @@ public class JpegToVideoApplication {
 //        String result = filePath.substring(0, filePath.lastIndexOf("\\"));
 //        System.out.println(result);
 
-        String str = "/D:/test/jpeg2video.jar";
-        String substring = str.substring(str.indexOf("/") + 1);
-        String replace = substring.replace("/", "\\\\");
+//        String str = "/D:/test/jpeg2video.jar";
+//        String substring = str.substring(str.indexOf("/") + 1);
+//        String replace = substring.replace("/", "\\\\");
     }
 }
