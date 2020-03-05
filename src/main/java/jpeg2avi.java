@@ -2,15 +2,22 @@ import com.tencent.jpegutil.util.FfmpegUtil;
 import org.apache.commons.cli.*;
 
 /**
- * 为配合命令transform，所以类名小写
+ * 为配合小写命令名称，所以类名小写
+ * jpeg转avi视频
  */
-public class transform {
+public class jpeg2avi {
 
     public static void main(String[] args) throws Exception {
 
         FfmpegUtil.transformByFfmpeg(parseArgs(args));
     }
 
+    /**
+     * 解析输入参数
+     * @param args
+     * @return
+     * @throws Exception
+     */
     private static CommandLine parseArgs(String[] args) throws Exception {
         Options options = new Options();
         options.addOption("h", "help", false, "使用信息");

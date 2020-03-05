@@ -55,6 +55,9 @@ public class FfmpegUtil {
 
             // 所有jpeg文件
             File[] files = sourceFile.listFiles();
+            if(files.length < 1) {
+                throw new RuntimeException("jpeg not exits");
+            }
 
             // 文件排序
             sortFile(files);
@@ -82,10 +85,19 @@ public class FfmpegUtil {
             command.add("-i");
             command.add(jpegTmpDir + File.separator + "%5d.jpeg");
 
+            // 默认分辨率 1280x720
+            // 视频分辨率，宽高比
+            // -vf scale=640:480,setdar=4:3
+            // https://zh.wikipedia.org/wiki/%E6%98%BE%E7%A4%BA%E5%88%86%E8%BE%A8%E7%8E%87%E5%88%97%E8%A1%A8
+            if("true".equals(comparess)) {
+                command.add("-vf");
+                command.add("scale=960:540");
+            }
+
             // 编码格式，控制分辨率(清晰度和体积)
-            // libx264 和图片一样清晰度
-            // 默认为mpeg4，清晰度一般，体积小
-            if(!"true".equals(comparess)) {
+            // libx264 和图片一样清晰度 -vcodec libx264，测试时发现转成的视频播放不流畅
+            // 默认为mpeg4，清晰度一般，体积小，播放流畅
+            if("false".equals(comparess)) {
                 command.add("-vcodec");
                 command.add("libx264");
             }
@@ -114,7 +126,7 @@ public class FfmpegUtil {
      * @param targetAbsolutePath
      * @throws IOException
      */
-    private static void copyFileToTmpDir(File[] files, String targetAbsolutePath) throws IOException {
+    public static void copyFileToTmpDir(File[] files, String targetAbsolutePath) throws IOException {
 
         for(int i = 0 ; i < files.length; i ++) {
             if(!files[i].isFile() || !files[i].getName().contains("jpeg")) {
@@ -129,7 +141,7 @@ public class FfmpegUtil {
      * @param filePath
      * @return
      */
-    private static String getParentPath(String filePath) {
+    public static String getParentPath(String filePath) {
         if(StringUtils.isBlank(filePath)) {
             return null;
         }
@@ -198,7 +210,7 @@ public class FfmpegUtil {
      * 获取当前时间字符串，格式为yyyyMMddHHmmSS
      * @return
      */
-    private static String nowDateStr() {
+    public static String nowDateStr() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmSS");
         return sdf.format(new Date());
     }
@@ -239,9 +251,9 @@ public class FfmpegUtil {
         ProcessBuilder builder = new ProcessBuilder(command);
         Process process = builder.start();
         if(0 == process.waitFor()) {
-            System.out.println("jpeg transform to avi success!");
+            System.out.println("success!");
         } else {
-            System.out.println("jpeg transform to avi fail!");
+            System.out.println("fail!");
         }
     }
 
@@ -259,5 +271,32 @@ public class FfmpegUtil {
             }
             return o1.getName().compareTo(o2.getName());
         });
+    }
+
+    /**
+     * 视频转图片
+     * 生成的图片位于视频同级目录文件夹中
+     * @param videoPath
+     * @param ffmpegPath
+     */
+    public static void video2jpeg(String videoPath, String ffmpegPath, String jpegPath) throws Exception {
+
+        List<String> command = new ArrayList<>();
+        // ffmpeg文件路径
+        command.add(ffmpegPath);
+        // 视频路径
+        command.add("-i");
+        command.add(videoPath);
+        // 1 秒 25帧
+        command.add("-r");
+        command.add("25");
+        // 图片
+        command.add("-f");
+        command.add("image2");
+        // 生成图片目录及图片名称
+        command.add(jpegPath + "%5d.jpeg");
+
+        // 执行ffmpeg命令
+        process(command);
     }
 }
