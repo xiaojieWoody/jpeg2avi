@@ -20,7 +20,7 @@ public class FfmpegUtil {
         String jpegPath = commandLine.getOptionValue("p");
         String comparess = commandLine.getOptionValue("c");
         // 生成的视频文件存放在jpeg的同级目录下
-        String aviPath = getParentPath(jpegPath) + File.separator + nowDateStr() + ".avi" ;
+        String aviPath = getParentPath(jpegPath) + nowDateStr() + ".avi" ;
         System.out.println("video path:" + aviPath);
         // jpeg图片转avi视频
         transformJpeg2Video(jpegPath, aviPath,comparess);
@@ -56,7 +56,7 @@ public class FfmpegUtil {
             // 所有jpeg文件
             File[] files = sourceFile.listFiles();
             if(files.length < 1) {
-                throw new RuntimeException("jpeg not exits");
+                throw new RuntimeException("jpeg not exists");
             }
 
             // 文件排序
@@ -128,11 +128,20 @@ public class FfmpegUtil {
      */
     public static void copyFileToTmpDir(File[] files, String targetAbsolutePath) throws IOException {
 
+        File targetDir = new File(targetAbsolutePath);
+        if(!targetDir.exists()) {
+            targetDir.mkdir();
+        }
+
         for(int i = 0 ; i < files.length; i ++) {
             if(!files[i].isFile() || !files[i].getName().contains("jpeg")) {
                 continue;
             }
             FileUtils.copyFile(files[i], new File(targetAbsolutePath + File.separator + String.format("%05d", i) +".jpeg"));
+        }
+
+        if(targetDir.listFiles().length < 1) {
+            throw new RuntimeException("jpeg not exists!");
         }
     }
 
@@ -151,9 +160,9 @@ public class FfmpegUtil {
 //            System.out.println("getParentPath filePath..." + filePath);
             if(!filePath.contains("\\\\")) {
 //                System.out.println("filePath..." + filePath);
-                return filePath;
+                return filePath + File.separator;
             }
-            result = filePath.substring(0, filePath.lastIndexOf("\\\\"));
+            result = filePath.substring(0, filePath.lastIndexOf("\\\\")) + File.separator;
 //            System.out.println("result..." + result);
         } else {
             // linux mac
