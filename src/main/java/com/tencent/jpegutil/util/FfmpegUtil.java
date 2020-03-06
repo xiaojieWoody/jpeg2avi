@@ -98,8 +98,18 @@ public class FfmpegUtil {
             // libx264 和图片一样清晰度 -vcodec libx264，测试时发现转成的视频播放不流畅
             // 默认为mpeg4，清晰度一般，体积小，播放流畅
             if("false".equals(comparess)) {
+
                 command.add("-vcodec");
                 command.add("libx264");
+
+                // 编码优化参数
+                command.add("-tune");
+                // 零延迟，否则转换出的视频播放会出现卡顿现象
+                command.add("zerolatency");
+
+                // 加快编码速率，需在大小和速率做平衡
+                command.add("-b:v");
+                command.add("2000k");
             }
 
             // 视频路径
@@ -296,7 +306,7 @@ public class FfmpegUtil {
         // 视频路径
         command.add("-i");
         command.add(videoPath);
-        // 1 秒 25帧
+        // 1 秒 25帧 （1秒生成25张图片）
         command.add("-r");
         command.add("25");
         // 图片
