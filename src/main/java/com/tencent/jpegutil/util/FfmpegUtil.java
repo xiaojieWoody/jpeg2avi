@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FfmpegUtil {
 
@@ -18,12 +19,12 @@ public class FfmpegUtil {
     public static void transformByFfmpeg(CommandLine commandLine) throws IOException {
         // jpeg图片目录路径
         String jpegPath = commandLine.getOptionValue("p");
-        String comparess = commandLine.getOptionValue("c");
+        String level = commandLine.getOptionValue("l");
         // 生成的视频文件存放在jpeg的同级目录下
-        String aviPath = getParentPath(jpegPath) + nowDateStr() + ".avi" ;
-        System.out.println("video path:" + aviPath);
+        String aviPath = getParentPath(jpegPath) + nowDateStr() + CommonConstant.VIDEO_TYPE ;
+        System.out.println("video path: " + aviPath);
         // jpeg图片转avi视频
-        transformJpeg2Video(jpegPath, aviPath,comparess);
+        transformJpeg2Video(jpegPath, aviPath,level);
     }
 
     /**
@@ -31,7 +32,7 @@ public class FfmpegUtil {
      * @param sourcePath    jpeg图片目录
      * @param targetPath    avi视频目录
      */
-    public static void transformJpeg2Video(String sourcePath, String targetPath, String comparess) throws IOException {
+    public static void transformJpeg2Video(String sourcePath, String targetPath, String level) throws IOException {
 
         File sourceFile = new File(sourcePath);
         if(!sourceFile.exists() || !sourceFile.isDirectory()) {
@@ -40,23 +41,20 @@ public class FfmpegUtil {
 
         // jpeg目录的父目录路径
         String tmpParent = getParentPath(sourcePath);
-//        System.out.println("tmpParent....." + tmpParent);
 
         String ffmpegPath = null;
         String jpegTmpDir = null;
         try {
             // jpeg目录同级目录下的临时目录
             jpegTmpDir = tmpParent + File.separator + "jpeg_tmp_" + nowDateStr();
-//            System.out.println("jpeg_tmp_....." + jpegTmpDir);
 
             // 获取ffmpeg路径
             ffmpegPath = getFfmpegPathBySystemOS();
-//            System.out.println("ffmpegPath....." + ffmpegPath);
 
             // 所有jpeg文件
             File[] files = sourceFile.listFiles();
             if(files.length < 1) {
-                throw new RuntimeException("jpeg not exists");
+                throw new RuntimeException("jpeg not exists!");
             }
 
             // 文件排序
@@ -76,37 +74,32 @@ public class FfmpegUtil {
             command.add("-f");
             command.add("image2");
 
+            // 获取图片帧
             // 视频帧率，默认25（一般视频默认值），-r 25，1秒播25个图片
             // 视频时长(秒) = 图片数 / r
-//            command.add("-r");
-//            command.add("10");
+            int jpegTbr = getJpegTbr(files[0].getAbsolutePath(), ffmpegPath);
+            if(jpegTbr != 0) {
+                command.add("-r");
+                command.add("" + jpegTbr);
+            }
 
             // jpeg目录中图片（图片有序且名称要符合配置的正则表达式）
             command.add("-i");
-            command.add(jpegTmpDir + File.separator + "%5d.jpeg");
+            command.add(jpegTmpDir + File.separator + "%5d" + "." + CommonConstant.JPEG);
 
             // 默认分辨率 1280x720
-            // 视频分辨率，宽高比
-            // -vf scale=640:480,setdar=4:3
-            // https://zh.wikipedia.org/wiki/%E6%98%BE%E7%A4%BA%E5%88%86%E8%BE%A8%E7%8E%87%E5%88%97%E8%A1%A8
-            if("true".equals(comparess)) {
-                command.add("-vf");
-                command.add("scale=960:540");
-            }
-
-            // 编码格式，控制分辨率(清晰度和体积)
-            // libx264 和图片一样清晰度 -vcodec libx264，测试时发现转成的视频播放不流畅
-            // 默认为mpeg4，清晰度一般，体积小，播放流畅
-            if("false".equals(comparess)) {
-
+            // 根据level设置分辨率
+            if(level != null) {
+                setCompressLevel(command, level);
+            } else {
+                // 编码格式，控制分辨率(清晰度和体积)
+                // libx264 和图片一样清晰度 -vcodec libx264
+                // 默认为mpeg4，清晰度一般，体积小
                 command.add("-vcodec");
                 command.add("libx264");
-
-                // 编码优化参数
+                // 编码优化参数，零延迟，否则转换出的视频播放会出现卡顿现象
                 command.add("-tune");
-                // 零延迟，否则转换出的视频播放会出现卡顿现象
                 command.add("zerolatency");
-
                 // 加快编码速率，需在大小和速率做平衡
                 command.add("-b:v");
                 command.add("2000k");
@@ -144,10 +137,10 @@ public class FfmpegUtil {
         }
 
         for(int i = 0 ; i < files.length; i ++) {
-            if(!files[i].isFile() || !files[i].getName().contains("jpeg")) {
+            if(!files[i].isFile() || !files[i].getName().contains(CommonConstant.JPEG)) {
                 continue;
             }
-            FileUtils.copyFile(files[i], new File(targetAbsolutePath + File.separator + String.format("%05d", i) +".jpeg"));
+            FileUtils.copyFile(files[i], new File(targetAbsolutePath + File.separator + String.format("%05d", i) + "." + CommonConstant.JPEG));
         }
 
         if(targetDir.listFiles().length < 1) {
@@ -167,13 +160,10 @@ public class FfmpegUtil {
         String result  = null;
         // windows
         if(filePath.contains(":")) {
-//            System.out.println("getParentPath filePath..." + filePath);
-            if(!filePath.contains("\\\\")) {
-//                System.out.println("filePath..." + filePath);
+            if(!filePath.contains(CommonConstant.WIN_SEPARATOR)) {
                 return filePath + File.separator;
             }
-            result = filePath.substring(0, filePath.lastIndexOf("\\\\")) + File.separator;
-//            System.out.println("result..." + result);
+            result = filePath.substring(0, filePath.lastIndexOf(CommonConstant.WIN_SEPARATOR)) + File.separator;
         } else {
             // linux mac
             String[] split = filePath.split(File.separator);
@@ -199,27 +189,26 @@ public class FfmpegUtil {
         String ffmpegPath = null;
 
         // 操作系统类型 windows linux mac
-        String osName = System.getProperty("os.name").toLowerCase();
+        String osName = System.getProperty(CommonConstant.OS_NAME).toLowerCase();
 
-        if(osName.contains("windows")) {
+        if(osName.contains(CommonConstant.WINDOWS)) {
             // 获取的 jar 路径为 /D:/test/jpeg2video.jar
-            String substring = resourcePath.substring(resourcePath.indexOf("/") + 1);
-            resourcePath = substring.replace("/", "\\\\");
+            String substring = resourcePath.substring(resourcePath.indexOf(CommonConstant.DEFAULT_SEPARATOR) + 1);
+            resourcePath = substring.replace(CommonConstant.DEFAULT_SEPARATOR, CommonConstant.WIN_SEPARATOR);
             // 获取 jar包中ffmpeg
-            ffmpegPath = getJarFile(resourcePath, "ffmpeg/windows/ffmpeg.exe");
-        } else if(osName.contains("mac")) {
-            ffmpegPath = getJarFile(resourcePath, "ffmpeg/mac/ffmpeg");
+            ffmpegPath = getJarFile(resourcePath, CommonConstant.WIN_JAR_FFMPEG_PATH);
+
+        } else if(osName.contains(CommonConstant.MAC)) {
+            ffmpegPath = getJarFile(resourcePath, CommonConstant.MAC_JAR_FFMPEG_PATH);
+
         } else {
             // ffmpeg/linux/ffmpeg  为jar包中相对路径
-            ffmpegPath = getJarFile(resourcePath, "ffmpeg/linux/ffmpeg");
+            ffmpegPath = getJarFile(resourcePath, CommonConstant.LINUX_JAR_FFMPEG_PATH);
         }
-
-//        System.out.println("ffmpegPath....." + ffmpegPath);
 
         File ffmpeg = new File(ffmpegPath);
         if(!ffmpeg.exists() || !ffmpeg.canExecute()) {
-            System.out.println("ffmpeg not exists or can not execute !..........");
-            throw new RuntimeException("ffmpeg ffmpeg not exists or can not execute .....");
+            throw new RuntimeException("ffmpeg not exists or can not execute .....");
         }
 
         return ffmpegPath;
@@ -247,16 +236,14 @@ public class FfmpegUtil {
         String substring = targetFilePath.substring(targetFilePath.lastIndexOf(File.separator) + 1);
         // 目标文件
         File targetFile = new File(parentPath, substring);
-//        System.out.println("getJarFile targetFile..." + targetFile.getAbsolutePath());
 
         // 获取jar包中文件流，ffmpeg/mac/ffmpeg
         InputStream resourceAsStream = FfmpegUtil.class.getClassLoader().getResourceAsStream(targetFilePath);
         if(null == resourceAsStream) {
-            throw new RuntimeException("jar中ffmpeg文件不存在!");
+            throw new RuntimeException("jar ffmpeg not exists!");
         }
         FileUtils.copyInputStreamToFile(resourceAsStream, targetFile);
         targetFile.setExecutable(true);
-//        System.out.println("targetFile.getAbsolutePath()......" + targetFile.getAbsolutePath());
         return targetFile.getAbsolutePath();
     }
 
@@ -317,5 +304,65 @@ public class FfmpegUtil {
 
         // 执行ffmpeg命令
         process(command);
+    }
+
+    /**
+     * 根据设置的level设置分辨率
+     * @param command
+     * @param level
+     */
+    public static void setCompressLevel(List<String> command, String level) {
+
+        // 使用图片本身分辨率，使用默认的编码格式
+        if("1".equals(level)) {
+            return;
+        }
+
+        // 根据level获取对应的分辨率的值
+        String contentByLevel = CompressLevelEnum.getContentByLevel(level);
+        if(contentByLevel == null) {
+            throw new RuntimeException("level param is not right");
+        }
+        // 分辨率
+        command.add("-vf");
+        command.add(contentByLevel);
+    }
+
+    /**
+     * 获取图片帧
+     * @param jpegPath
+     * @return
+     */
+    public static int getJpegTbr(String jpegPath, String ffmpegPath) throws Exception {
+
+        int result = 0;
+
+        // 构建命令
+        List<String> command = new ArrayList<>();
+        command.add(ffmpegPath);
+        command.add("-i");
+        command.add(jpegPath);
+        command.add("-hide_banner");
+
+        ProcessBuilder builder = new ProcessBuilder(command);
+        Process process = builder.start();
+
+        // 获取命令执行后的返回结果
+        BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        String content = null;
+        while ((content = br.readLine()) != null) {
+            if(content.contains(CommonConstant.TBR)) {
+                String[] contentSplit = content.split(",");
+                // 遍历
+                List<String> tbrList = Arrays.stream(contentSplit).filter(str -> str.contains(CommonConstant.TBR)).collect(Collectors.toList());
+                if(tbrList != null && tbrList .size() == 1) {
+                    //  25 tbr 替换为 25
+                    result = Integer.parseInt(tbrList.get(0).replace(CommonConstant.TBR, "").trim());
+                } else {
+                    return result;
+                }
+            }
+        }
+        return result;
     }
 }

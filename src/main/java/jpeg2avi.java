@@ -25,9 +25,9 @@ public class jpeg2avi {
         // jpeg目录路径
         options.addOption(Option.builder("p").longOpt("jpegPath")
                 .hasArg().argName("jpegPath").desc("jpeg directory path").required(true).build());
-        // 是否压缩
-        options.addOption(Option.builder("c").longOpt("compress")
-                .hasArg().argName("compress").desc("compress video").required(false).build());
+        // 设置分辨率等级
+        options.addOption(Option.builder("l").longOpt("compressLevel")
+                .hasArg().argName("compressLevel").desc("compress video").required(false).build());
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
