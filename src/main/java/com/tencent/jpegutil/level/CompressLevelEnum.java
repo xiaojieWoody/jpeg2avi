@@ -1,4 +1,4 @@
-package com.tencent.jpegutil.util;
+package com.tencent.jpegutil.level;
 
 /**
  * 分辨率对应的level

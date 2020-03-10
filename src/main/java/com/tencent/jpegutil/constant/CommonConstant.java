@@ -1,4 +1,4 @@
-package com.tencent.jpegutil.util;
+package com.tencent.jpegutil.constant;
 
 public class CommonConstant  {
 

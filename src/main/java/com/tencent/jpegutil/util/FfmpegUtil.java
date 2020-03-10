@@ -1,8 +1,11 @@
 package com.tencent.jpegutil.util;
 
+import com.tencent.jpegutil.constant.CommonConstant;
+import com.tencent.jpegutil.level.CompressLevelEnum;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -20,9 +23,11 @@ public class FfmpegUtil {
         // jpeg图片目录路径
         String jpegPath = commandLine.getOptionValue("p");
         String level = commandLine.getOptionValue("l");
+
         // 生成的视频文件存放在jpeg的同级目录下
         String aviPath = getParentPath(jpegPath) + nowDateStr() + CommonConstant.VIDEO_TYPE ;
         System.out.println("video path: " + aviPath);
+
         // jpeg图片转avi视频
         transformJpeg2Video(jpegPath, aviPath,level);
     }
@@ -111,6 +116,7 @@ public class FfmpegUtil {
             process(command);
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("jpeg transform to avi fail!");
         } finally {
             // 删除jpeg临时目录
             if(!StringUtils.isBlank(jpegTmpDir)) {
@@ -233,9 +239,9 @@ public class FfmpegUtil {
         // jar包所在目录
         String parentPath = getParentPath(jarPath);
         // 目标文件名称
-        String substring = targetFilePath.substring(targetFilePath.lastIndexOf(File.separator) + 1);
+        String targetName = targetFilePath.substring(targetFilePath.lastIndexOf(File.separator) + 1);
         // 目标文件
-        File targetFile = new File(parentPath, substring);
+        File targetFile = new File(parentPath, targetName);
 
         // 获取jar包中文件流，ffmpeg/mac/ffmpeg
         InputStream resourceAsStream = FfmpegUtil.class.getClassLoader().getResourceAsStream(targetFilePath);
@@ -355,7 +361,7 @@ public class FfmpegUtil {
                 String[] contentSplit = content.split(",");
                 // 遍历
                 List<String> tbrList = Arrays.stream(contentSplit).filter(str -> str.contains(CommonConstant.TBR)).collect(Collectors.toList());
-                if(tbrList != null && tbrList .size() == 1) {
+                if(!CollectionUtils.isEmpty(tbrList) && tbrList .size() == 1) {
                     //  25 tbr 替换为 25
                     result = Integer.parseInt(tbrList.get(0).replace(CommonConstant.TBR, "").trim());
                 } else {
