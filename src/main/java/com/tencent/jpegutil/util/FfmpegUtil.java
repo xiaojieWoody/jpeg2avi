@@ -24,12 +24,15 @@ public class FfmpegUtil {
         String jpegPath = commandLine.getOptionValue("p");
         String level = commandLine.getOptionValue("l");
 
+        // 获取fps
+        int fps = getFps(commandLine.getOptionValue("f"));
+
         // 生成的视频文件存放在jpeg的同级目录下
         String aviPath = getParentPath(jpegPath) + nowDateStr() + CommonConstant.VIDEO_TYPE ;
         System.out.println("video path: " + aviPath);
 
         // jpeg图片转avi视频
-        transformJpeg2Video(jpegPath, aviPath,level);
+        transformJpeg2Video(jpegPath, aviPath,level, fps);
     }
 
     /**
@@ -37,7 +40,7 @@ public class FfmpegUtil {
      * @param sourcePath    jpeg图片目录
      * @param targetPath    avi视频目录
      */
-    public static void transformJpeg2Video(String sourcePath, String targetPath, String level) throws IOException {
+    public static void transformJpeg2Video(String sourcePath, String targetPath, String level, int fps) throws IOException {
 
         File sourceFile = new File(sourcePath);
         if(!sourceFile.exists() || !sourceFile.isDirectory()) {
@@ -82,11 +85,9 @@ public class FfmpegUtil {
             // 获取图片帧
             // 视频帧率，默认25（一般视频默认值），-r 25，1秒播25个图片
             // 视频时长(秒) = 图片数 / r
-            int jpegTbr = getJpegTbr(files[0].getAbsolutePath(), ffmpegPath);
-            if(jpegTbr != 0) {
-                command.add("-r");
-                command.add("" + jpegTbr);
-            }
+            System.out.println("fps..." + fps);
+            command.add("-r");
+            command.add("" + fps);
 
             // jpeg目录中图片（图片有序且名称要符合配置的正则表达式）
             command.add("-i");
@@ -291,7 +292,7 @@ public class FfmpegUtil {
      * @param videoPath
      * @param ffmpegPath
      */
-    public static void video2jpeg(String videoPath, String ffmpegPath, String jpegPath) throws Exception {
+    public static void video2jpeg(String videoPath, String ffmpegPath, String jpegPath, String fps) throws Exception {
 
         List<String> command = new ArrayList<>();
         // ffmpeg文件路径
@@ -300,8 +301,11 @@ public class FfmpegUtil {
         command.add("-i");
         command.add(videoPath);
         // 1 秒 25帧 （1秒生成25张图片）
+        // 获取fps
+        int fpsResult = getFps(fps);
         command.add("-r");
-        command.add("25");
+        System.out.println("fps........." + fpsResult);
+        command.add("" + fpsResult);
         // 图片
         command.add("-f");
         command.add("image2");
@@ -367,6 +371,27 @@ public class FfmpegUtil {
                 } else {
                     return result;
                 }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取正整数 fps(帧率)
+     * @param fps
+     * @return
+     */
+    private static int getFps(String fps) {
+        int result = CommonConstant.DEFAULT_FPS;
+        if(null != fps) {
+            try {
+                result = Integer.parseInt(fps);
+            } catch (Exception e) {
+                throw new RuntimeException("fps 格式不对");
+            }
+
+            if(result <= 0) {
+                throw new RuntimeException("fps 应为正整数!");
             }
         }
         return result;

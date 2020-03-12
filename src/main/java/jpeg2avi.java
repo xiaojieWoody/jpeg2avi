@@ -29,6 +29,9 @@ public class jpeg2avi {
         options.addOption(Option.builder("l").longOpt("compressLevel")
                 .hasArg().argName("compressLevel").desc("compress video").required(false).build());
 
+        options.addOption(Option.builder("f").longOpt("fps")
+                .hasArg().argName("fps").desc("video fps").required(false).build());
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine result = null;
