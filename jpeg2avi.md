@@ -20,6 +20,9 @@
   -compressLevel=1        # 使用图片分辨率，但是进行编码优化
   -compressLevel=2        # 1280 X 1024
   -compressLevel=2        # 960 X 540
+  
+  # 指定帧率，正整数，非必须，默认25
+  -fps=25
   ```
 
 * 测试例子（作为参照）
@@ -42,7 +45,10 @@
 * 将视频转为`jpeg`图片（测试用）
 
   ```shell
-  java -cp jpeg2avi.jar video2jpeg /dev_env/jpeg2video/test.mp4
+  # 默认帧率为25，即1秒视频截取25张图片
+  java -cp jpeg2avi.jar video2jpeg -videoPath=/dev_env/jpeg2video/test.mp4
+  # 设置帧率为15
+  java -cp jpeg2avi.jar video2jpeg -videoPath=/dev_env/jpeg2video/test.mp4 -fps=15
   ```
 
 * `jpeg`图片转`avi`视频
@@ -50,7 +56,11 @@
   ```shell
   java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg
   
+  # 默认帧率，压缩等级1
   java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg -compressLevel=1
+  
+  # 指定帧率为20，压缩等级2
+  java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg -compressLevel=2 -fps=20
   ```
   
 
@@ -59,7 +69,7 @@
 * 将视频转为`jpeg`图片（测试用）
 
   ```shell
-  java -cp jpeg2avi.jar video2jpeg d:\\test\\test.mp4
+  java -cp jpeg2avi.jar video2jpeg -videoPath=d:\\test\\test.mp4 -fps=15
   ```
 
 * 将`jpeg`图片转为`avi`视频
@@ -67,7 +77,8 @@
   ```shell
   # 不加compressLevel，转换时间会比较久
   java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg
-  java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg -compressLevel=1
+  # 指定帧率
+  java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg -compressLevel=1 -fps=15
   ```
   
   
