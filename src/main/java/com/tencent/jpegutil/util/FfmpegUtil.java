@@ -23,16 +23,21 @@ public class FfmpegUtil {
         // jpeg图片目录路径
         String jpegPath = commandLine.getOptionValue("p");
         String level = commandLine.getOptionValue("l");
+        String type = commandLine.getOptionValue("t");
 
         // 获取fps
         int fps = getFps(commandLine.getOptionValue("f"));
 
         // 生成的视频文件存放在jpeg的同级目录下
-        String aviPath = getParentPath(jpegPath) + nowDateStr() + CommonConstant.VIDEO_TYPE ;
-        System.out.println("video path: " + aviPath);
+        String videoType = CommonConstant.VIDEO_DEFAULT_TYPE;
+        if(!StringUtils.isBlank(type)) {
+            videoType = type.toLowerCase();
+        }
+        String videoPath = getParentPath(jpegPath) + nowDateStr() + "." + videoType ;
+        System.out.println("video path: " + videoPath);
 
         // jpeg图片转avi视频
-        transformJpeg2Video(jpegPath, aviPath,level, fps);
+        transformJpeg2Video(jpegPath, videoPath,level, fps);
     }
 
     /**

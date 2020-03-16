@@ -23,6 +23,9 @@
   
   # 指定帧率，正整数，非必须，默认25
   -fps=25
+  
+  # 输出视频格式，如avi，mp4，flv等，非必须，默认avi格式
+  -videoType=flv
   ```
 
 * 测试例子（作为参照）
@@ -48,7 +51,7 @@
   # 默认帧率为25，即1秒视频截取25张图片
   java -cp jpeg2avi.jar video2jpeg -videoPath=/dev_env/jpeg2video/test.mp4
   # 设置帧率为15
-  java -cp jpeg2avi.jar video2jpeg -videoPath=/dev_env/jpeg2video/test.mp4 -fps=15
+  java -cp jpeg2avi.jar video2jpeg -videoPath=/dev_env/jpeg2video/test.mp4 -fps=15 
   ```
 
 * `jpeg`图片转`avi`视频
@@ -60,7 +63,7 @@
   java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg -compressLevel=1
   
   # 指定帧率为20，压缩等级2
-  java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg -compressLevel=2 -fps=20
+  java -cp jpeg2avi-jar-with-dependencies.jar jpeg2avi -jpegPath=/Users/dingyuanjie/work/engine/doc/jpeg-to-video/video/500jpeg -compressLevel=2 -fps=20 -videoType=flv
   ```
   
 
@@ -78,7 +81,7 @@
   # 不加compressLevel，转换时间会比较久
   java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg
   # 指定帧率
-  java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg -compressLevel=1 -fps=15
+  java -cp jpeg2avi.jar jpeg2avi -jpegPath=d:\\test\\500jpeg -compressLevel=1 -fps=15 -videoType=flv
   ```
   
   

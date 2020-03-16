@@ -14,7 +14,7 @@ public class CommonConstant  {
 
     public static final String JPEG = "jpeg";
 
-    public static final String VIDEO_TYPE = ".avi";
+    public static final String VIDEO_DEFAULT_TYPE = "avi";
 
     public static final String WIN_SEPARATOR = "\\\\";
     public static final String DEFAULT_SEPARATOR = "/";

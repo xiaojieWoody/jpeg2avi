@@ -32,6 +32,9 @@ public class jpeg2avi {
         options.addOption(Option.builder("f").longOpt("fps")
                 .hasArg().argName("fps").desc("video fps").required(false).build());
 
+        options.addOption(Option.builder("t").longOpt("videoType")
+                .hasArg().argName("videoType").desc("video type").required(false).build());
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine result = null;
