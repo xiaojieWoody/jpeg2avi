@@ -36,14 +36,14 @@ public class FfmpegUtil {
         String videoPath = getParentPath(jpegPath) + nowDateStr() + "." + videoType ;
         System.out.println("video path: " + videoPath);
 
-        // jpeg图片转avi视频
+        // jpeg图片转视频
         transformJpeg2Video(jpegPath, videoPath,level, fps);
     }
 
     /**
-     * Jpeg图片转为mp4视频
+     * Jpeg图片转为视频
      * @param sourcePath    jpeg图片目录
-     * @param targetPath    avi视频目录
+     * @param targetPath    视频目录
      */
     public static void transformJpeg2Video(String sourcePath, String targetPath, String level, int fps) throws IOException {
 
@@ -122,7 +122,7 @@ public class FfmpegUtil {
             process(command);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("jpeg transform to avi fail!");
+            throw new RuntimeException("jpeg transform to video fail!");
         } finally {
             // 删除jpeg临时目录
             if(!StringUtils.isBlank(jpegTmpDir)) {

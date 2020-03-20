@@ -3,9 +3,9 @@ import org.apache.commons.cli.*;
 
 /**
  * 为配合小写命令名称，所以类名小写
- * jpeg转avi视频
+ * jpeg转视频
  */
-public class jpeg2avi {
+public class jpeg2video {
 
     public static void main(String[] args) throws Exception {
 

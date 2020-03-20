@@ -54,7 +54,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>jpeg2avi</finalName>
+		<finalName>jpeg2video</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
