@@ -386,7 +386,7 @@ public class FfmpegUtil {
      * @param fps
      * @return
      */
-    private static int getFps(String fps) {
+    public static int getFps(String fps) {
         int result = CommonConstant.DEFAULT_FPS;
         if(null != fps) {
             try {
