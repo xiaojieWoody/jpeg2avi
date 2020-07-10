@@ -74,6 +74,7 @@ public class FfmpegUtil {
             sortFile(files);
 
             // 拷贝文件到临时目录,jpeg重命名
+            // 原图片名比较复杂，ffmpeg 需 图片有序且名称要符合配置的正则表达式
             copyFileToTmpDir(files, jpegTmpDir);
 
             // 图片转视频
@@ -287,7 +288,8 @@ public class FfmpegUtil {
             if(o1.isFile() && o2.isDirectory()) {
                 return 1;
             }
-            return o1.getName().compareTo(o2.getName());
+            return o1.getName().compareTo(o2.getName());  // 升序
+//            return o2.getName().compareTo(o1.getName());    // 降序
         });
     }
 
@@ -341,44 +343,6 @@ public class FfmpegUtil {
         // 分辨率
         command.add("-vf");
         command.add(contentByLevel);
-    }
-
-    /**
-     * 获取图片帧
-     * @param jpegPath
-     * @return
-     */
-    public static int getJpegTbr(String jpegPath, String ffmpegPath) throws Exception {
-
-        int result = 0;
-
-        // 构建命令
-        List<String> command = new ArrayList<>();
-        command.add(ffmpegPath);
-        command.add("-i");
-        command.add(jpegPath);
-        command.add("-hide_banner");
-
-        ProcessBuilder builder = new ProcessBuilder(command);
-        Process process = builder.start();
-
-        // 获取命令执行后的返回结果
-        BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String content = null;
-        while ((content = br.readLine()) != null) {
-            if(content.contains(CommonConstant.TBR)) {
-                String[] contentSplit = content.split(",");
-                // 遍历
-                List<String> tbrList = Arrays.stream(contentSplit).filter(str -> str.contains(CommonConstant.TBR)).collect(Collectors.toList());
-                if(!CollectionUtils.isEmpty(tbrList) && tbrList .size() == 1) {
-                    //  25 tbr 替换为 25
-                    result = Integer.parseInt(tbrList.get(0).replace(CommonConstant.TBR, "").trim());
-                } else {
-                    return result;
-                }
-            }
-        }
-        return result;
     }
 
     /**

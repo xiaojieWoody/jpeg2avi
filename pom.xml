@@ -61,12 +61,13 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.4.1</version>
 				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>util.Microseer</mainClass>
+							<mainClass>com.tencent.jpegutil.ctl.Jpeg2Video</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
