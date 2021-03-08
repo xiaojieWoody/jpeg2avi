@@ -1,5 +1,7 @@
 package com.tencent.jpegutil.ctl;
 
+import com.tencent.ad.mdf4.video.api.ComplianceUtil;
+import com.tencent.autocloud.compliance.client.lib.ComplianceLibrary;
 import com.tencent.jpegutil.constant.CommonConstant;
 import com.tencent.jpegutil.util.FfmpegUtil;
 import org.apache.commons.cli.*;
@@ -27,57 +29,69 @@ public class Jpeg2Video {
 
     public static void main(String[] args) throws Exception {
 
-        // 解析启动参数
         parseArgs(args);
-        if (commandLine.hasOption(OPT_HELP)) {
-            printHelpMessage();
-            return;
-        }
 
+//        String sourceVideoPath = "/root/data/25fps_20s_test.avi";
+        String sourceVideoPath = commandLine.getOptionValue(JPEG_PATH);;
+//        String targetVideoPath = "/root/data/JayChou3333.avi";
+        String targetVideoPath = commandLine.getOptionValue(COMPRESS_LEVEL);;
+
+        // 初始化 compliance lib
+        ComplianceLibrary.loadLibrary();
+
+        ComplianceUtil.processVideo(sourceVideoPath, targetVideoPath);
+
+//        // 解析启动参数
+//        parseArgs(args);
+//        if (commandLine.hasOption(OPT_HELP)) {
+//            printHelpMessage();
+//            return;
+//        }
+//
         // jpeg图片目录路径
-        String jpegPath = null;
-        if (commandLine.hasOption(JPEG_PATH)) {
-            jpegPath = commandLine.getOptionValue(JPEG_PATH);
-        }
-
-        // 视频压缩
-        String level = null;
-        if (commandLine.hasOption(COMPRESS_LEVEL)) {
-            level = commandLine.getOptionValue(COMPRESS_LEVEL);
-        }
-
-        // 视频格式
-        String type = null;
-        // 默认 avi 格式
-        String videoType = CommonConstant.VIDEO_DEFAULT_TYPE;
-        if (commandLine.hasOption(VIDEO_TYPE)) {
-            type = commandLine.getOptionValue(VIDEO_TYPE);
-            videoType = type;
-        }
-
-        // 视频帧率
-        int fps = 25;
-        if (commandLine.hasOption(VIDEO_FPS)) {
-            String fpsStr = commandLine.getOptionValue(VIDEO_FPS);
-            fps = FfmpegUtil.getFps(fpsStr);
-        }
-
-        // 视频目录路径
-        String sourceVideoPath = null;
-        if (commandLine.hasOption(VIDEO_PATH)) {
-            sourceVideoPath = commandLine.getOptionValue(VIDEO_PATH);
-        }
-
-        if(StringUtils.isNotBlank(sourceVideoPath)) {
-            // 视频转图片
-            video2Jpeg(sourceVideoPath, String.valueOf(fps));
-        } else {
-            // jpeg图片转视频
-            // 生成的视频文件存放在jpeg的同级目录下
-            String videoPath = FfmpegUtil.getParentPath(jpegPath) + FfmpegUtil.nowDateStr() + "." + videoType ;
-            System.out.println("video path: " + videoPath);
-            FfmpegUtil.transformJpeg2Video(jpegPath, videoPath, level,  fps);
-        }
+//        String jpegPath = null;
+//        if (commandLine.hasOption(JPEG_PATH)) {
+//            jpegPath = commandLine.getOptionValue(JPEG_PATH);
+//        }
+//
+//        // 视频压缩
+//        String level = null;
+//        if (commandLine.hasOption(COMPRESS_LEVEL)) {
+//            level = commandLine.getOptionValue(COMPRESS_LEVEL);
+//        }
+//
+//        // 视频格式
+//        String type = null;
+//        // 默认 avi 格式
+//        String videoType = CommonConstant.VIDEO_DEFAULT_TYPE;
+//        if (commandLine.hasOption(VIDEO_TYPE)) {
+//            type = commandLine.getOptionValue(VIDEO_TYPE);
+//            videoType = type;
+//        }
+//
+//        // 视频帧率
+//        int fps = 25;
+//        if (commandLine.hasOption(VIDEO_FPS)) {
+//            String fpsStr = commandLine.getOptionValue(VIDEO_FPS);
+//            fps = FfmpegUtil.getFps(fpsStr);
+//        }
+//
+//        // 视频目录路径
+//        String sourceVideoPath = null;
+//        if (commandLine.hasOption(VIDEO_PATH)) {
+//            sourceVideoPath = commandLine.getOptionValue(VIDEO_PATH);
+//        }
+//
+//        if(StringUtils.isNotBlank(sourceVideoPath)) {
+//            // 视频转图片
+//            video2Jpeg(sourceVideoPath, String.valueOf(fps));
+//        } else {
+//            // jpeg图片转视频
+//            // 生成的视频文件存放在jpeg的同级目录下
+//            String videoPath = FfmpegUtil.getParentPath(jpegPath) + FfmpegUtil.nowDateStr() + "." + videoType ;
+//            System.out.println("video path: " + videoPath);
+//            FfmpegUtil.transformJpeg2Video(jpegPath, videoPath, level,  fps);
+//        }
     }
 
     /**

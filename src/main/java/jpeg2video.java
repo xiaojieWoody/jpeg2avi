@@ -1,3 +1,5 @@
+import com.tencent.ad.mdf4.video.api.ComplianceUtil;
+import com.tencent.autocloud.compliance.client.lib.ComplianceLibrary;
 import com.tencent.jpegutil.util.FfmpegUtil;
 import org.apache.commons.cli.*;
 
@@ -9,7 +11,14 @@ public class jpeg2video {
 
     public static void main(String[] args) throws Exception {
 
-        FfmpegUtil.transformByFfmpeg(parseArgs(args));
+//        FfmpegUtil.transformByFfmpeg(parseArgs(args));
+        String sourceVideoPath = "/root/data/25fps_20s_test.avi";
+        String targetVideoPath = "/root/data/JayChou3333.avi";
+
+        // 初始化 compliance lib
+        ComplianceLibrary.loadLibrary();
+
+        ComplianceUtil.processVideo(sourceVideoPath, targetVideoPath);
     }
 
     /**
